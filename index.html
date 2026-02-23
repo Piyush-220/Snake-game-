@@ -1,116 +1,126 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Solar System - Wikipedia</title>
+    <title>Snake Game</title>
     <style>
         body {
-            font-family: Georgia, serif;
-            background-color: #f8f9fa;
-            margin: 0;
-        }
-
-        .header {
-            background-color: white;
-            border-bottom: 1px solid #a2a9b1;
-            padding: 10px 20px;
-            font-size: 22px;
-            font-weight: bold;
-        }
-
-        .container {
             display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #222;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: white;
+            flex-direction: column;
         }
 
-        .sidebar {
-            width: 200px;
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-right: 1px solid #a2a9b1;
-        }
-
-        .sidebar a {
-            display: block;
-            color: #0645ad;
-            text-decoration: none;
-            margin: 5px 0;
-            font-size: 14px;
-        }
-
-        .sidebar a:hover {
-            text-decoration: underline;
-        }
-
-        .content {
-            padding: 20px;
-            flex: 1;
-            background-color: white;
-        }
-
-        h1 {
-            border-bottom: 1px solid #a2a9b1;
-            padding-bottom: 5px;
+        canvas {
+            background-color: black;
+            border: 2px solid white;
         }
 
         h2 {
-            border-bottom: 1px solid #a2a9b1;
-            padding-bottom: 3px;
-            margin-top: 20px;
-        }
-
-        p {
-            line-height: 1.6;
-            font-size: 15px;
-        }
-
-        .infobox {
-            float: right;
-            width: 250px;
-            border: 1px solid #a2a9b1;
-            padding: 10px;
-            margin: 10px;
-            background-color: #f8f9fa;
-            font-size: 14px;
-        }
-
-        .infobox h3 {
-            text-align: center;
-            margin: 5px 0;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
 
-<div class="header">
-    Wikipedia
-</div>
+<h2>Snake Game 🐍</h2>
+<canvas id="game" width="400" height="400"></canvas>
 
-<div class="container">
+<script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
 
-    <div class="sidebar">
-        <b>Contents</b>
-        <a href="#history">History</a>
-        <a href="#structure">Structure</a>
-        <a href="#planets">Planets</a>
-        <a href="#references">References</a>
-    </div>
+    const box = 20;
+    const canvasSize = 400;
 
-    <div class="content">
-        <h1>Solar System</h1>
+    let snake = [{ x: 200, y: 200 }];
+    let direction = "RIGHT";
+    let food = {
+        x: Math.floor(Math.random() * (canvasSize / box)) * box,
+        y: Math.floor(Math.random() * (canvasSize / box)) * box
+    };
+    let score = 0;
 
-        <div class="infobox">
-            <h3>Solar System</h3>
-            <p><b>Age:</b> 4.6 billion years</p>
-            <p><b>Number of Planets:</b> 8</p>
-            <p><b>Central Star:</b> Sun</p>
-        </div>
+    document.addEventListener("keydown", changeDirection);
 
-        <p>
-            The <b>Solar System</b> is the gravitationally bound system of the Sun and the objects that orbit it. 
-            It formed approximately 4.6 billion years ago from the gravitational collapse of a giant interstellar molecular cloud.
-        </p>
+    function changeDirection(event) {
+        if (event.key === "ArrowLeft" && direction !== "RIGHT")
+            direction = "LEFT";
+        else if (event.key === "ArrowUp" && direction !== "DOWN")
+            direction = "UP";
+        else if (event.key === "ArrowRight" && direction !== "LEFT")
+            direction = "RIGHT";
+        else if (event.key === "ArrowDown" && direction !== "UP")
+            direction = "DOWN";
+    }
 
-        <h2 id="history">History</h2>
-        <p>
+    function draw() {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvasSize, canvasSize);
+
+        // Draw snake
+        for (let i = 0; i < snake.length; i++) {
+            ctx.fillStyle = i === 0 ? "lime" : "green";
+            ctx.fillRect(snake[i].x, snake[i].y, box, box);
+        }
+
+        // Draw food
+        ctx.fillStyle = "red";
+        ctx.fillRect(food.x, food.y, box, box);
+
+        // Move snake
+        let headX = snake[0].x;
+        let headY = snake[0].y;
+
+        if (direction === "LEFT") headX -= box;
+        if (direction === "UP") headY -= box;
+        if (direction === "RIGHT") headX += box;
+        if (direction === "DOWN") headY += box;
+
+        // Game Over conditions
+        if (
+            headX < 0 || headY < 0 ||
+            headX >= canvasSize || headY >= canvasSize ||
+            collision({ x: headX, y: headY }, snake)
+        ) {
+            clearInterval(game);
+            alert("Game Over! Your Score: " + score);
+        }
+
+        let newHead = { x: headX, y: headY };
+
+        // Eat food
+        if (headX === food.x && headY === food.y) {
+            score++;
+            food = {
+                x: Math.floor(Math.random() * (canvasSize / box)) * box,
+                y: Math.floor(Math.random() * (canvasSize / box)) * box
+            };
+        } else {
+            snake.pop();
+        }
+
+        snake.unshift(newHead);
+    }
+
+    function collision(head, array) {
+        for (let i = 0; i < array.length; i++) {
+            if (head.x === array[i].x && head.y === array[i].y) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    let game = setInterval(draw, 100);
+</script>
+
+</body>
+</html>        <p>
             The Solar System formed from a large rotating cloud of gas and dust known as the solar nebula. 
             Over time, gravity pulled material together to form the Sun and the surrounding planets.
         </p>
